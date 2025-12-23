@@ -23,10 +23,12 @@ public class AccessLogServiceImpl implements AccessLogService {
     private final GuestRepository guestRepository;
     private final KeyShareRequestRepository keyShareRequestRepository;
 
-    public AccessLogServiceImpl(AccessLogRepository accessLogRepository,
-                                DigitalKeyRepository digitalKeyRepository,
-                                GuestRepository guestRepository,
-                                KeyShareRequestRepository keyShareRequestRepository) {
+    public AccessLogServiceImpl(
+            AccessLogRepository accessLogRepository,
+            DigitalKeyRepository digitalKeyRepository,
+            GuestRepository guestRepository,
+            KeyShareRequestRepository keyShareRequestRepository
+    ) {
         this.accessLogRepository = accessLogRepository;
         this.digitalKeyRepository = digitalKeyRepository;
         this.guestRepository = guestRepository;
@@ -41,27 +43,13 @@ public class AccessLogServiceImpl implements AccessLogService {
             throw new IllegalArgumentException("future");
         }
 
-        // Fetch key
+        // Fetch digital key
         DigitalKey key = digitalKeyRepository.findById(log.getDigitalKey().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
-
-        if (!Boolean.TRUE.equals(key.getActive())) {
-            return accessLogRepository.save(
-                    new AccessLog(key, log.getGuest(), log.getAccessTime(),
-                            "DENIED", "Key inactive")
-            );
-        }
 
         // Fetch guest
         Guest guest = guestRepository.findById(log.getGuest().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
-
-        if (!Boolean.TRUE.equals(guest.getActive())) {
-            return accessLogRepository.save(
-                    new AccessLog(key, guest, log.getAccessTime(),
-                            "DENIED", "Guest inactive")
-            );
-        }
 
         boolean allowed = false;
 
@@ -86,9 +74,36 @@ public class AccessLogServiceImpl implements AccessLogService {
             }
         }
 
-        // Create final access log
+        AccessLog resultLog;
+
         if (allowed) {
-            log = new AccessLog(
+            resultLog = new AccessLog(
                     key,
                     guest,
                     log.getAccessTime(),
+                    "SUCCESS",
+                    "Access granted"
+            );
+        } else {
+            resultLog = new AccessLog(
+                    key,
+                    guest,
+                    log.getAccessTime(),
+                    "DENIED",
+                    "Access denied"
+            );
+        }
+
+        return accessLogRepository.save(resultLog);
+    }
+
+    @Override
+    public List<AccessLog> getLogsForKey(Long keyId) {
+        return accessLogRepository.findByDigitalKeyId(keyId);
+    }
+
+    @Override
+    public List<AccessLog> getLogsForGuest(Long guestId) {
+        return accessLogRepository.findByGuestId(guestId);
+    }
+}
