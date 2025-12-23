@@ -1,8 +1,14 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.AccessLog;
+import com.example.demo.model.DigitalKey;
+import com.example.demo.model.Guest;
+import com.example.demo.model.KeyShareRequest;
+import com.example.demo.repository.AccessLogRepository;
+import com.example.demo.repository.DigitalKeyRepository;
+import com.example.demo.repository.GuestRepository;
+import com.example.demo.repository.KeyShareRequestRepository;
 import com.example.demo.service.AccessLogService;
 import org.springframework.stereotype.Service;
 
@@ -30,41 +36,59 @@ public class AccessLogServiceImpl implements AccessLogService {
     @Override
     public AccessLog createLog(AccessLog log) {
 
+        // Validate future access time
         if (log.getAccessTime().after(new Timestamp(System.currentTimeMillis()))) {
             throw new IllegalArgumentException("future");
         }
 
+        // Fetch key
         DigitalKey key = digitalKeyRepository.findById(log.getDigitalKey().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
 
+        if (!Boolean.TRUE.equals(key.getActive())) {
+            return accessLogRepository.save(
+                    new AccessLog(key, log.getGuest(), log.getAccessTime(),
+                            "DENIED", "Key inactive")
+            );
+        }
+
+        // Fetch guest
         Guest guest = guestRepository.findById(log.getGuest().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
 
-        boolean allowed = key.getBooking().getGuest().getId().equals(guest.getId()) ||
-                keyShareRequestRepository.findBySharedWithId(guest.getId()).stream()
-                        .anyMatch(r ->
-                                r.getDigitalKey().getId().equals(key.getId()) &&
-                                "APPROVED".equals(r.getStatus()) &&
-                                log.getAccessTime().after(r.getShareStart()) &&
-                                log.getAccessTime().before(r.getShareEnd())
-                        );
-
-        if (allowed) {
-            log = new AccessLog(key, guest, log.getAccessTime(), "SUCCESS", "Access granted");
-        } else {
-            log = new AccessLog(key, guest, log.getAccessTime(), "DENIED", "Access denied");
+        if (!Boolean.TRUE.equals(guest.getActive())) {
+            return accessLogRepository.save(
+                    new AccessLog(key, guest, log.getAccessTime(),
+                            "DENIED", "Guest inactive")
+            );
         }
 
-        return accessLogRepository.save(log);
-    }
+        boolean allowed = false;
 
-    @Override
-    public List<AccessLog> getLogsForKey(Long keyId) {
-        return accessLogRepository.findByDigitalKeyId(keyId);
-    }
+        // Case 1: Booking owner
+        if (key.getBooking().getGuest().getId().equals(guest.getId())) {
+            allowed = true;
+        }
 
-    @Override
-    public List<AccessLog> getLogsForGuest(Long guestId) {
-        return accessLogRepository.findByGuestId(guestId);
-    }
-}
+        // Case 2: Shared access
+        if (!allowed) {
+            List<KeyShareRequest> shares =
+                    keyShareRequestRepository.findBySharedWithId(guest.getId());
+
+            for (KeyShareRequest req : shares) {
+                if (req.getDigitalKey().getId().equals(key.getId())
+                        && "APPROVED".equals(req.getStatus())
+                        && log.getAccessTime().after(req.getShareStart())
+                        && log.getAccessTime().before(req.getShareEnd())) {
+                    allowed = true;
+                    break;
+                }
+            }
+        }
+
+        // Create final access log
+        if (allowed) {
+            log = new AccessLog(
+                    key,
+                    guest,
+                    log.getAccessTime(),
