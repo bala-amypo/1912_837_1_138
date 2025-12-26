@@ -33,7 +33,8 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public Guest updateGuest(Long id, Guest updatedGuest) {
         Guest existing = guestRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Guest not found with id " + id));
 
         existing.setFullName(updatedGuest.getFullName());
         existing.setPhoneNumber(updatedGuest.getPhoneNumber());
@@ -47,7 +48,8 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public Guest getGuestById(Long id) {
         return guestRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Guest not found with id " + id));
     }
 
     @Override
@@ -65,6 +67,7 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public Guest getGuestByEmail(String email) {
         return guestRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Guest not found with email " + email));
     }
 }
