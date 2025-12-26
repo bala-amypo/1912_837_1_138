@@ -49,13 +49,14 @@ public class DigitalKeyServiceImpl implements DigitalKeyService {
 
     @Override
     public DigitalKey getKeyById(Long id) {
-        return digitalKeyRepository.findById(id).orElse(null);
+        return digitalKeyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
     }
 
     @Override
     public DigitalKey getActiveKeyForBooking(Long bookingId) {
         return digitalKeyRepository.findByBookingIdAndActiveTrue(bookingId)
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("No active key found"));
     }
 
     @Override
