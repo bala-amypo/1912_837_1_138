@@ -46,8 +46,9 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public Guest getGuestById(Long id) {
         return guestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
+            .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
     }
+
 
     @Override
     public List<Guest> getAllGuests() {
