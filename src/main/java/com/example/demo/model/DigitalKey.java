@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity
 @Table(name = "digital_keys", uniqueConstraints = {
@@ -24,8 +25,7 @@ public class DigitalKey {
 
     private Boolean active = true;
 
-    public DigitalKey() {
-    }
+    public DigitalKey() {}
 
     public DigitalKey(RoomBooking booking, String keyValue,
                       Timestamp issuedAt, Timestamp expiresAt,
@@ -48,12 +48,24 @@ public class DigitalKey {
 
     // getters and setters
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }   // ✅ REQUIRED
+
     public RoomBooking getBooking() { return booking; }
     public void setBooking(RoomBooking booking) { this.booking = booking; }
+
     public String getKeyValue() { return keyValue; }
     public void setKeyValue(String keyValue) { this.keyValue = keyValue; }
+
     public Timestamp getIssuedAt() { return issuedAt; }
+    public void setIssuedAt(Instant issuedAt) {     // ✅ TEST EXPECTS Instant
+        this.issuedAt = issuedAt == null ? null : Timestamp.from(issuedAt);
+    }
+
     public Timestamp getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Instant expiresAt) {   // ✅ TEST EXPECTS Instant
+        this.expiresAt = expiresAt == null ? null : Timestamp.from(expiresAt);
+    }
+
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
 }

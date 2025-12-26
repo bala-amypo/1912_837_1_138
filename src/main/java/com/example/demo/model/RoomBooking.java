@@ -31,8 +31,7 @@ public class RoomBooking {
     )
     private Set<Guest> roommates = new HashSet<>();
 
-    public RoomBooking() {
-    }
+    public RoomBooking() {}
 
     public RoomBooking(Guest guest, String roomNumber,
                        LocalDate checkInDate, LocalDate checkOutDate,
@@ -56,15 +55,22 @@ public class RoomBooking {
 
     // getters and setters
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }   // ✅ REQUIRED BY TESTS
+
     public Guest getGuest() { return guest; }
     public void setGuest(Guest guest) { this.guest = guest; }
+
     public String getRoomNumber() { return roomNumber; }
     public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
+
     public LocalDate getCheckInDate() { return checkInDate; }
     public void setCheckInDate(LocalDate checkInDate) { this.checkInDate = checkInDate; }
+
     public LocalDate getCheckOutDate() { return checkOutDate; }
     public void setCheckOutDate(LocalDate checkOutDate) { this.checkOutDate = checkOutDate; }
+
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
+
     public Set<Guest> getRoommates() { return roommates; }
 }
