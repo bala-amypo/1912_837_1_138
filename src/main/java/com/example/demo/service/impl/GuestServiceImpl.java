@@ -1,6 +1,5 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Guest;
 import com.example.demo.repository.GuestRepository;
 import com.example.demo.service.GuestService;
@@ -33,7 +32,7 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public Guest updateGuest(Long id, Guest updatedGuest) {
         Guest existing = guestRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
 
         existing.setFullName(updatedGuest.getFullName());
         existing.setPhoneNumber(updatedGuest.getPhoneNumber());
@@ -47,7 +46,7 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public Guest getGuestById(Long id) {
         return guestRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
     }
 
     @Override
@@ -65,7 +64,6 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public Guest getGuestByEmail(String email) {
         return guestRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Guest not found with email " + email));
+                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
     }
 }

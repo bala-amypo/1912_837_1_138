@@ -1,6 +1,5 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.DigitalKey;
 import com.example.demo.model.Guest;
 import com.example.demo.model.KeyShareRequest;
@@ -37,17 +36,17 @@ public class KeyShareRequestServiceImpl implements KeyShareRequestService {
         }
 
         DigitalKey key = digitalKeyRepository.findById(request.getDigitalKey().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Key not found"));
 
         if (!key.getActive()) {
             throw new IllegalStateException("Key is inactive");
         }
 
         Guest by = guestRepository.findById(request.getSharedBy().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
 
         Guest with = guestRepository.findById(request.getSharedWith().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
 
         request.setStatus("PENDING");
         return repository.save(request);
@@ -63,7 +62,7 @@ public class KeyShareRequestServiceImpl implements KeyShareRequestService {
     @Override
     public KeyShareRequest getShareRequestById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Share request not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Share request not found"));
     }
 
     @Override

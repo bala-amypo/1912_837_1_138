@@ -1,6 +1,5 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.AccessLog;
 import com.example.demo.model.DigitalKey;
 import com.example.demo.model.Guest;
@@ -38,63 +37,51 @@ public class AccessLogServiceImpl implements AccessLogService {
     @Override
     public AccessLog createLog(AccessLog log) {
 
-        // Validate future access time
-        if (log.getAccessTime().after(new Timestamp(System.currentTimeMillis()))) {
-            throw new IllegalArgumentException("future");
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        // STRICT future validation (only if clearly future)
+        if (log.getAccessTime() != null && log.getAccessTime().after(new Timestamp(now.getTime() + 1000))) {
+            throw new IllegalArgumentException("Access time cannot be in the future");
         }
 
-        // Fetch digital key
         DigitalKey key = digitalKeyRepository.findById(log.getDigitalKey().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Key not found"));
 
-        // Fetch guest
         Guest guest = guestRepository.findById(log.getGuest().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
 
         boolean allowed = false;
 
-        // Case 1: Booking owner
-        if (key.getBooking().getGuest().getId().equals(guest.getId())) {
+        // Owner access
+        if (key.getActive() && key.getBooking().getGuest().getId().equals(guest.getId())) {
             allowed = true;
         }
 
-        // Case 2: Shared access
-        if (!allowed) {
+        // Shared access
+        if (!allowed && key.getActive()) {
             List<KeyShareRequest> shares =
                     keyShareRequestRepository.findBySharedWithId(guest.getId());
 
             for (KeyShareRequest req : shares) {
                 if (req.getDigitalKey().getId().equals(key.getId())
                         && "APPROVED".equals(req.getStatus())
-                        && log.getAccessTime().after(req.getShareStart())
-                        && log.getAccessTime().before(req.getShareEnd())) {
+                        && !log.getAccessTime().before(req.getShareStart())
+                        && !log.getAccessTime().after(req.getShareEnd())) {
                     allowed = true;
                     break;
                 }
             }
         }
 
-        AccessLog resultLog;
+        AccessLog result = new AccessLog(
+                key,
+                guest,
+                log.getAccessTime(),
+                allowed ? "SUCCESS" : "DENIED",
+                allowed ? "Access granted" : "Access denied"
+        );
 
-        if (allowed) {
-            resultLog = new AccessLog(
-                    key,
-                    guest,
-                    log.getAccessTime(),
-                    "SUCCESS",
-                    "Access granted"
-            );
-        } else {
-            resultLog = new AccessLog(
-                    key,
-                    guest,
-                    log.getAccessTime(),
-                    "DENIED",
-                    "Access denied"
-            );
-        }
-
-        return accessLogRepository.save(resultLog);
+        return accessLogRepository.save(result);
     }
 
     @Override
