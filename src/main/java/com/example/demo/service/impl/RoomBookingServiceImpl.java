@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.RoomBooking;
 import com.example.demo.repository.RoomBookingRepository;
 import com.example.demo.service.RoomBookingService;
@@ -26,10 +27,8 @@ public class RoomBookingServiceImpl implements RoomBookingService {
 
     @Override
     public RoomBooking updateBooking(Long id, RoomBooking updated) {
-        RoomBooking existing = bookingRepository.findById(id).orElse(null);
-        if (existing == null) {
-            return null;
-        }
+        RoomBooking existing = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
 
         if (!updated.getCheckInDate().isBefore(updated.getCheckOutDate())) {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
@@ -45,7 +44,8 @@ public class RoomBookingServiceImpl implements RoomBookingService {
 
     @Override
     public RoomBooking getBookingById(Long id) {
-        return bookingRepository.findById(id).orElse(null);
+        return bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
     }
 
     @Override
@@ -56,9 +56,7 @@ public class RoomBookingServiceImpl implements RoomBookingService {
     @Override
     public void deactivateBooking(Long id) {
         RoomBooking booking = getBookingById(id);
-        if (booking != null) {
-            booking.setActive(false);
-            bookingRepository.save(booking);
-        }
+        booking.setActive(false);
+        bookingRepository.save(booking);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Guest;
 import com.example.demo.repository.GuestRepository;
 import com.example.demo.service.GuestService;
@@ -31,10 +32,8 @@ public class GuestServiceImpl implements GuestService {
 
     @Override
     public Guest updateGuest(Long id, Guest updatedGuest) {
-        Guest existing = guestRepository.findById(id).orElse(null);
-        if (existing == null) {
-            return null;
-        }
+        Guest existing = guestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
 
         existing.setFullName(updatedGuest.getFullName());
         existing.setPhoneNumber(updatedGuest.getPhoneNumber());
@@ -47,7 +46,8 @@ public class GuestServiceImpl implements GuestService {
 
     @Override
     public Guest getGuestById(Long id) {
-        return guestRepository.findById(id).orElse(null);
+        return guestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
     }
 
     @Override
@@ -58,14 +58,13 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public void deactivateGuest(Long id) {
         Guest guest = getGuestById(id);
-        if (guest != null) {
-            guest.setActive(false);
-            guestRepository.save(guest);
-        }
+        guest.setActive(false);
+        guestRepository.save(guest);
     }
 
     @Override
     public Guest getGuestByEmail(String email) {
-        return guestRepository.findByEmail(email).orElse(null);
+        return guestRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest not found"));
     }
 }
