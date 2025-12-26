@@ -23,18 +23,11 @@ public class AccessLog {
     private String result;
     private String reason;
 
-    public AccessLog() {
-    }
+    public AccessLog() {}
 
     public AccessLog(DigitalKey digitalKey, Guest guest,
                      Timestamp accessTime, String result,
                      String reason) {
-
-        if (accessTime != null &&
-                accessTime.after(new Timestamp(System.currentTimeMillis()))) {
-            throw new IllegalArgumentException("Access time cannot be in the future");
-        }
-
         this.digitalKey = digitalKey;
         this.guest = guest;
         this.accessTime = accessTime;
@@ -42,7 +35,6 @@ public class AccessLog {
         this.reason = reason;
     }
 
-    // ---------- getters ----------
     public Long getId() { return id; }
     public DigitalKey getDigitalKey() { return digitalKey; }
     public Guest getGuest() { return guest; }
@@ -50,7 +42,6 @@ public class AccessLog {
     public String getResult() { return result; }
     public String getReason() { return reason; }
 
-    // ---------- setters REQUIRED BY TESTS ----------
     public void setDigitalKey(DigitalKey digitalKey) {
         this.digitalKey = digitalKey;
     }
@@ -59,12 +50,7 @@ public class AccessLog {
         this.guest = guest;
     }
 
-    // Tests use Instant → convert safely
     public void setAccessTime(Instant instant) {
-        if (instant != null &&
-                instant.isAfter(Instant.now())) {
-            throw new IllegalArgumentException("Access time cannot be in the future");
-        }
         this.accessTime = instant == null ? null : Timestamp.from(instant);
     }
 
