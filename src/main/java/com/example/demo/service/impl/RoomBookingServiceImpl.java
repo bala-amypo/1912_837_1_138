@@ -41,6 +41,7 @@ public class RoomBookingServiceImpl implements RoomBookingService {
         return bookingRepository.save(existing);
     }
 
+
     @Override
     public RoomBooking getBookingById(Long id) {
         return bookingRepository.findById(id)
