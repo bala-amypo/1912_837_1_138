@@ -26,8 +26,10 @@ public class RoomBookingServiceImpl implements RoomBookingService {
 
     @Override
     public RoomBooking updateBooking(Long id, RoomBooking updated) {
-        RoomBooking existing = bookingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        RoomBooking existing = bookingRepository.findById(id).orElse(null);
+        if (existing == null) {
+            return null;
+        }
 
         if (!updated.getCheckInDate().isBefore(updated.getCheckOutDate())) {
             throw new IllegalArgumentException("Check-in date must be before check-out date");
@@ -41,11 +43,9 @@ public class RoomBookingServiceImpl implements RoomBookingService {
         return bookingRepository.save(existing);
     }
 
-
     @Override
     public RoomBooking getBookingById(Long id) {
-        return bookingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        return bookingRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -56,7 +56,9 @@ public class RoomBookingServiceImpl implements RoomBookingService {
     @Override
     public void deactivateBooking(Long id) {
         RoomBooking booking = getBookingById(id);
-        booking.setActive(false);
-        bookingRepository.save(booking);
+        if (booking != null) {
+            booking.setActive(false);
+            bookingRepository.save(booking);
+        }
     }
 }

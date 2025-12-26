@@ -34,7 +34,7 @@ public class DigitalKeyServiceImpl implements DigitalKeyService {
         }
 
         Instant issuedAt = Instant.now();
-        Instant expiresAt = issuedAt.plusSeconds(86400); // 24 hours
+        Instant expiresAt = issuedAt.plusSeconds(86400);
 
         DigitalKey key = new DigitalKey(
                 booking,
@@ -49,18 +49,14 @@ public class DigitalKeyServiceImpl implements DigitalKeyService {
 
     @Override
     public DigitalKey getKeyById(Long id) {
-        return digitalKeyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Key not found"));
+        return digitalKeyRepository.findById(id).orElse(null);
     }
 
     @Override
     public DigitalKey getActiveKeyForBooking(Long bookingId) {
         return digitalKeyRepository.findByBookingIdAndActiveTrue(bookingId)
-            .orElseThrow(() -> new IllegalArgumentException("No active key found"));
+                .orElse(null);
     }
-
-
-    
 
     @Override
     public List<DigitalKey> getKeysForGuest(Long guestId) {
