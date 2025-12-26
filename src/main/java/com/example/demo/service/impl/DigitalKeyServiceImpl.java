@@ -8,7 +8,7 @@ import com.example.demo.repository.RoomBookingRepository;
 import com.example.demo.service.DigitalKeyService;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,12 +29,12 @@ public class DigitalKeyServiceImpl implements DigitalKeyService {
         RoomBooking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
 
-        if (!booking.getActive()) {
+        if (!Boolean.TRUE.equals(booking.getActive())) {
             throw new IllegalStateException("Booking is inactive");
         }
 
-        Timestamp issuedAt = new Timestamp(System.currentTimeMillis());
-        Timestamp expiresAt = new Timestamp(issuedAt.getTime() + 86400000);
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plusSeconds(86400); // 24 hours
 
         DigitalKey key = new DigitalKey(
                 booking,
