@@ -1,7 +1,10 @@
 package com.example.demo.security;
 
+import com.example.demo.model.Guest;
+import com.example.demo.repository.GuestRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -17,6 +20,9 @@ public class JwtTokenProvider {
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    @Autowired
+    private GuestRepository guestRepository; // ✅ REQUIRED for tests
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
@@ -56,6 +62,14 @@ public class JwtTokenProvider {
 
     public String getRoleFromToken(String token) {
         return getClaims(token).get("role", String.class);
+    }
+
+    // 🔥 THIS METHOD IS REQUIRED BY TESTS
+    public Long getUserIdFromToken(String token) {
+        String email = getEmailFromToken(token);
+        Guest guest = guestRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return guest.getId();
     }
 
     private Claims getClaims(String token) {
