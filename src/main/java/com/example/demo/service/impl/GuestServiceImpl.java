@@ -31,8 +31,10 @@ public class GuestServiceImpl implements GuestService {
 
     @Override
     public Guest updateGuest(Long id, Guest updatedGuest) {
-        Guest existing = guestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
+        Guest existing = guestRepository.findById(id).orElse(null);
+        if (existing == null) {
+            return null;
+        }
 
         existing.setFullName(updatedGuest.getFullName());
         existing.setPhoneNumber(updatedGuest.getPhoneNumber());
@@ -45,10 +47,8 @@ public class GuestServiceImpl implements GuestService {
 
     @Override
     public Guest getGuestById(Long id) {
-        return guestRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
+        return guestRepository.findById(id).orElse(null);
     }
-
 
     @Override
     public List<Guest> getAllGuests() {
@@ -58,13 +58,14 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public void deactivateGuest(Long id) {
         Guest guest = getGuestById(id);
-        guest.setActive(false);
-        guestRepository.save(guest);
+        if (guest != null) {
+            guest.setActive(false);
+            guestRepository.save(guest);
+        }
     }
 
     @Override
     public Guest getGuestByEmail(String email) {
-        return guestRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Guest not found"));
+        return guestRepository.findByEmail(email).orElse(null);
     }
 }
