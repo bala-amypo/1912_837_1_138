@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity
 @Table(name = "key_share_requests")
@@ -58,7 +59,7 @@ public class KeyShareRequest {
         if (this.status == null) this.status = "PENDING";
     }
 
-    // getters
+    // ---------- getters ----------
     public Long getId() { return id; }
     public DigitalKey getDigitalKey() { return digitalKey; }
     public Guest getSharedBy() { return sharedBy; }
@@ -66,5 +67,33 @@ public class KeyShareRequest {
     public Timestamp getShareStart() { return shareStart; }
     public Timestamp getShareEnd() { return shareEnd; }
     public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+
+    // ---------- setters REQUIRED BY TESTS ----------
+    public void setDigitalKey(DigitalKey digitalKey) {
+        this.digitalKey = digitalKey;
+    }
+
+    public void setSharedBy(Guest sharedBy) {
+        this.sharedBy = sharedBy;
+    }
+
+    public void setSharedWith(Guest sharedWith) {
+        this.sharedWith = sharedWith;
+    }
+
+    public void setShareStart(Instant instant) {
+        this.shareStart = instant == null ? null : Timestamp.from(instant);
+    }
+
+    public void setShareEnd(Instant instant) {
+        if (shareStart != null && instant != null &&
+                instant.isBefore(shareStart.toInstant())) {
+            throw new IllegalArgumentException("Share end must be after start");
+        }
+        this.shareEnd = instant == null ? null : Timestamp.from(instant);
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

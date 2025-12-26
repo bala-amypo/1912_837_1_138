@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity
 @Table(name = "access_logs")
@@ -41,11 +42,37 @@ public class AccessLog {
         this.reason = reason;
     }
 
-    // getters
+    // ---------- getters ----------
     public Long getId() { return id; }
     public DigitalKey getDigitalKey() { return digitalKey; }
     public Guest getGuest() { return guest; }
     public Timestamp getAccessTime() { return accessTime; }
     public String getResult() { return result; }
     public String getReason() { return reason; }
+
+    // ---------- setters REQUIRED BY TESTS ----------
+    public void setDigitalKey(DigitalKey digitalKey) {
+        this.digitalKey = digitalKey;
+    }
+
+    public void setGuest(Guest guest) {
+        this.guest = guest;
+    }
+
+    // Tests use Instant → convert safely
+    public void setAccessTime(Instant instant) {
+        if (instant != null &&
+                instant.isAfter(Instant.now())) {
+            throw new IllegalArgumentException("Access time cannot be in the future");
+        }
+        this.accessTime = instant == null ? null : Timestamp.from(instant);
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
 }
