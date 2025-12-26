@@ -25,27 +25,27 @@ public class KeyShareRequestServiceImpl implements KeyShareRequestService {
     }
 
     @Override
-public KeyShareRequest createShareRequest(KeyShareRequest request) {
+    public KeyShareRequest createShareRequest(KeyShareRequest request) {
 
-    if (request.getShareEnd() != null && request.getShareStart() != null &&
-            request.getShareEnd().before(request.getShareStart())) {
-        throw new IllegalArgumentException("Share end must be after start");
+        if (request.getShareEnd() != null && request.getShareStart() != null &&
+                request.getShareEnd().before(request.getShareStart())) {
+            throw new IllegalArgumentException("Share end must be after start");
+        }
+
+        if (request.getSharedBy().getId().equals(request.getSharedWith().getId())) {
+            throw new IllegalArgumentException("sharedBy and sharedWith cannot be same");
+        }
+
+        DigitalKey key = digitalKeyRepository.findById(request.getDigitalKey().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Key not found"));
+
+        if (!Boolean.TRUE.equals(key.getActive())) {
+            throw new IllegalArgumentException("Key inactive");
+        }
+
+        request.setStatus("PENDING");
+        return repository.save(request);
     }
-
-    if (request.getSharedBy().getId().equals(request.getSharedWith().getId())) {
-        throw new IllegalArgumentException("sharedBy and sharedWith cannot be same");
-    }
-
-    DigitalKey key = digitalKeyRepository.findById(request.getDigitalKey().getId())
-            .orElseThrow(() -> new IllegalArgumentException("Key not found"));
-
-    if (!Boolean.TRUE.equals(key.getActive())) {
-        throw new IllegalArgumentException("Key inactive");
-    }
-
-    request.setStatus("PENDING");
-    return repository.save(request);
-}
 
 
     @Override
