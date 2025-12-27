@@ -117,20 +117,20 @@
                 <configuration>
                     <!-- Reuse JVM (huge win) -->
                     <reuseForks>true</reuseForks>
-        <forkCount>1</forkCount>
+                    <forkCount>1</forkCount>
 
-        <!-- Less console I/O -->
-        <trimStackTrace>true</trimStackTrace>
-        <redirectTestOutputToFile>true</redirectTestOutputToFile>
-    </configuration>
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.maven.surefire</groupId>
-            <artifactId>surefire-testng</artifactId>
-            <version>3.2.5</version>
-        </dependency>
-    </dependencies>
-</plugin>
+                    <!-- Less console I/O -->
+                    <trimStackTrace>true</trimStackTrace>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-testng</artifactId>
+                        <version>3.2.5</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
 
 
         </plugins>
