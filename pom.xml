@@ -62,14 +62,14 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- MariaDB Driver (IMPORTANT) -->
+        <!-- MariaDB Driver -->
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <version>3.3.3</version>
         </dependency>
 
-        <!-- Swagger / OpenAPI -->
+        <!-- Swagger -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -91,7 +91,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Lombok (optional) -->
+        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -103,17 +103,26 @@
     <build>
         <plugins>
 
-            <!-- Spring Boot Plugin -->
+            <!-- Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- Surefire for TestNG -->
+            <!-- Surefire (CRITICAL FOR SPEED) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
+
+                <configuration>
+                    <!-- Massive speedup for Mockito / ByteBuddy -->
+                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+
+                    <!-- Avoid scanning unused engines -->
+                    <useModulePath>false</useModulePath>
+                </configuration>
+
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
