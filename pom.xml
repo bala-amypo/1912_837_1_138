@@ -114,16 +114,24 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-testng</artifactId>
-                        <version>3.2.5</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+                <configuration>
+            <!-- Reuse JVM (huge win) -->
+        <reuseForks>true</reuseForks>
+        <forkCount>1</forkCount>
 
-        </plugins>
+        <!-- Less console I/O -->
+        <trimStackTrace>true</trimStackTrace>
+        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+    </configuration>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-testng</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+    </dependencies>
+</plugin>
+
     </build>
 
 </project>
